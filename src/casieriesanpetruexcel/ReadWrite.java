@@ -69,7 +69,7 @@ public class ReadWrite {
                 String valoare = line.get(5);
                 String descriere = line.get(2);
                 
-                if(line.get(0).equals("Casierie Sampetru")){// && currentDate.equals(date)){
+                if(line.get(0).equals("Casierie Sampetru")){
                         
                     if(!line.get(1).equals(currentDate)){
                         System.out.println("Current date: [" + currentDate + "]");
@@ -189,73 +189,7 @@ public class ReadWrite {
 
         return result;
     }
-    /*
-    public String read(String file, String date){
-        //System.out.println("READING: " + file);        
         
-        String csvFile = file;
-	BufferedReader br = null;
-	String line = "";
-	String cvsSplitBy = ",";
-
-	try {
-
-		br = new BufferedReader(new FileReader(csvFile));
-                HashMap<String, HashMap<String, String>> csvData = new HashMap<String, HashMap<String, String>>(); 
-                String currentDate = "";
-                
-                ArrayList<String> values = new ArrayList<String>();
-                ArrayList<String> descriptions = new ArrayList<String>();
-                
-                        
-		while ((line = br.readLine()) != null) {
-
-		        // use comma as separator
-			String[] data = line.split(cvsSplitBy);
-
-                     
-                        if(data[0].equals("Casierie Sampetru")){// && currentDate.equals(date)){
-                        
-                            if(!data[1].equals(currentDate)){
-                                
-                                 // changed the day; write te date in the header
-                                if(!currentDate.equals("")){
-                                    //this.writeDocxPoi(currentDate ,values, descriptions);
-                                    //values.clear();
-                                    //descriptions.clear();
-                                }
-                                currentDate = data[1];
-                               
-                            }
-                            System.out.println(data[5]);
-                            //this.sold+= intValue(Double.parseDouble(data[5]));
-                            values.add(data[5]);
-                            descriptions.add(data[2]);
-                                
-                        }
-                        
-		}
-
-	} catch (FileNotFoundException e) {
-		e.printStackTrace();
-	} catch (IOException e) {
-		e.printStackTrace();
-	} finally {
-		if (br != null) {
-			try {
-				br.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	System.out.println("Done");
-  
-        return "";
-    }
-    */
-    
     public void writeDocxPoi(String date, ArrayList<String> values, ArrayList<String> descriptions){
         //DateFormat df = new SimpleDateFormat("yyyyMMdd");
         //String sdt = df.format(new Date());
@@ -357,27 +291,5 @@ public class ReadWrite {
             return template;
     }
     
-    
-    
-    
-    public void openFile(){
-        
-/*
-        lblFileLink.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    
-                    try {
-                        Desktop.getDesktop().open(
-                                new File("AUDIO FILE PATH"));
-                    } catch (IOException e1) {
-
-                        e1.printStackTrace();
-                    }
-                }
-            });
-  */      
-    }
-
 }
 
