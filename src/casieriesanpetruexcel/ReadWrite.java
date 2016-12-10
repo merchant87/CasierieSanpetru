@@ -206,8 +206,9 @@ public class ReadWrite {
             
             Integer dataSize = values.size();
             System.out.println("Data size is: [" + dataSize.toString() + "]");
-            for (int i = 0; i <= 19; i++) {
-                System.out.println("i=["+i+"]");
+            //for (int i = 0; i <= 19; i++) {
+            for (int i = 19; i >= 0; i--) {// not to replace "$in1" in "$in19"
+                //System.out.println("i=["+i+"]");
                 if(i < dataSize){
                     Double valoare = Double.parseDouble(values.get(i));
                     if(valoare > 0){
@@ -219,10 +220,11 @@ public class ReadWrite {
                     }
                     System.out.println("i=["+i+"] , replacing with [" + descriptions.get(i) + "]");
                     tmpl = replaceText(tmpl, "$det"+i, descriptions.get(i));
-                        //System.out.println(values.get(i));
-                        //System.out.println(descriptions.get(i));
+                        
                 } else { // fill until the end of table with blanks
-                    System.out.println("i=["+i+"] , replacing with blanks");
+                    System.out.println("i=["+i+"] , replacing [$in"+i+"] with blanks");
+                    System.out.println("i=["+i+"] , replacing [$out"+i+"] with blanks");
+                    System.out.println("i=["+i+"] , replacing [$det"+i+"] with blanks");
                     tmpl = replaceText(tmpl, "$in"+i, "");
                     tmpl = replaceText(tmpl, "$out"+i, "");
                     tmpl = replaceText(tmpl, "$det"+i, "");
