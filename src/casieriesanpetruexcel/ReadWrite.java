@@ -40,6 +40,15 @@ import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 
 import java.util.*;
 import static oracle.jrockit.jfr.events.Bits.intValue;
+import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.apache.poi.xwpf.usermodel.XWPFTable;
+import org.apache.poi.xwpf.usermodel.XWPFTableCell;
+import org.apache.poi.xwpf.usermodel.XWPFTableRow;
+import pl.jsolve.templ4docx.core.Docx;
+import pl.jsolve.templ4docx.core.VariablePattern;
+import pl.jsolve.templ4docx.variable.TextVariable;
+import pl.jsolve.templ4docx.variable.Variables;
 /**
  *
  * @author liviu
@@ -72,24 +81,30 @@ public class ReadWrite {
                 if(line.get(0).equals("Casierie Sampetru")) {
                         
                     if(!line.get(1).equals(currentDate)){
+                        // changed the day; write te date in the header
                         //System.out.println("Current date: [" + currentDate + "]");
-                         // changed the day; write te date in the header
                         if(!currentDate.equals("")){
-                            
-                            this.writeDocxPoi(currentDate ,values, descriptions);
-                            values.clear();
-                            descriptions.clear();
+                            this.writeDocPoi(currentDate ,values, descriptions);
                         }
                         currentDate = line.get(1);
 
                     }
-                    //System.out.println(valoare);
+                    System.out.println(valoare);
                     this.sold+= intValue(Double.parseDouble(valoare));
                     values.add(valoare);
                     descriptions.add(descriere);
                         
                 }
             }
+            
+            // if it comes to the last date, it will not go to
+            //  the next iteration to write the data in the file
+            //  so we check that if data is not empty after the iteration
+            //  it means it has to be written
+            if(!values.isEmpty()){// last set of data
+                this.writeDocPoi(currentDate ,values, descriptions);
+            }
+            
             scanner.close();
         } catch (FileNotFoundException e) {
 		e.printStackTrace();
@@ -189,8 +204,96 @@ public class ReadWrite {
 
         return result;
     }
-        
+    
     public void writeDocxPoi(String date, ArrayList<String> values, ArrayList<String> descriptions){
+        String rootDir = "D:/Work/CasierieSanpetruExcel/";
+        
+        try{
+            
+            XWPFDocument tmpl = new XWPFDocument(OPCPackage.open(rootDir + "proces_verbal_sanpetru_template.docx")); 
+            
+            tmpl = replaceTextDocx(tmpl, "$sold_anterior", this.soldAnterior.toString());
+            
+            Integer dataSize = values.size();
+            //System.out.println("Data size is: [" + dataSize.toString() + "]");
+            //for (int i = 0; i <= 19; i++) {
+            for (int i = 19; i >= 0; i--) {// not to replace "$in1" in "$in19"
+                //System.out.println("i=["+i+"]");
+                if(i < dataSize){
+                    Double valoare = Double.parseDouble(values.get(i));
+                    if(valoare > 0){
+                        System.out.println("i=["+i+"] , replacing [$in"+i+"] with [" + values.get(i) + "]");
+                        tmpl = replaceTextDocx(tmpl, "$in"+i, values.get(i));
+                        tmpl = replaceTextDocx(tmpl, "$out"+i, "");
+                    } else {
+                        System.out.println("i=["+i+"] , replacing [$out"+i+"] with [" + valoare + "]");
+                        tmpl = replaceTextDocx(tmpl, "$out"+i, String.valueOf(Math.abs(valoare)));
+                        tmpl = replaceTextDocx(tmpl, "$in"+i, "");
+                    }
+                    System.out.println("i=["+i+"] , replacing with [" + descriptions.get(i) + "]");
+                    tmpl = replaceTextDocx(tmpl, "$det"+i, descriptions.get(i));
+                        
+                } else { // fill until the end of table with blanks
+                    System.out.println("i=["+i+"] , replacing [$in"+i+"] with blanks");
+                    System.out.println("i=["+i+"] , replacing [$out"+i+"] with blanks");
+                    System.out.println("i=["+i+"] , replacing [$det"+i+"] with blanks");
+                    tmpl = replaceTextDocx(tmpl, "$in"+i, "");
+                    tmpl = replaceTextDocx(tmpl, "$out"+i, "");
+                    tmpl = replaceTextDocx(tmpl, "$det"+i, "");
+                }
+            }
+            //System.out.println("----------------------------");
+            tmpl = replaceTextDocx(tmpl, "$sold", this.sold.toString());
+            
+            this.soldAnterior = this.sold;
+            
+            FileOutputStream output = new FileOutputStream(rootDir + "proces_verbal_sanpetru_" + date + ".docx");
+            tmpl.write(output);
+            output.close();
+            
+            values.clear();
+            descriptions.clear();
+            
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public XWPFDocument replaceTextDocx(XWPFDocument doc, String findText, String replaceText){
+        
+        for (XWPFParagraph p : doc.getParagraphs()) {
+            List<XWPFRun> runs = p.getRuns();
+            if (runs != null) {
+                for (XWPFRun r : runs) {
+                    String text = r.getText(0);
+                    if (text != null && text.contains(findText)) {
+                        text = text.replace(findText, replaceText);
+                        r.setText(text, 0);
+                    }
+                }
+            }
+        }
+        for (XWPFTable tbl : doc.getTables()) {
+           for (XWPFTableRow row : tbl.getRows()) {
+              for (XWPFTableCell cell : row.getTableCells()) {
+                 for (XWPFParagraph p : cell.getParagraphs()) {
+                    for (XWPFRun r : p.getRuns()) {
+                      String text = r.getText(0);
+                      if (text.contains(findText)) {
+                        text = text.replace(findText, replaceText);
+                        r.setText(text);
+                      }
+                    }
+                 }
+              }
+           }
+        }    
+         
+        
+        return doc;
+    }
+        
+    public void writeDocPoi(String date, ArrayList<String> values, ArrayList<String> descriptions){
         //DateFormat df = new SimpleDateFormat("yyyyMMdd");
         //String sdt = df.format(new Date());
         
@@ -206,8 +309,8 @@ public class ReadWrite {
             
             Integer dataSize = values.size();
             System.out.println("Data size is: [" + dataSize.toString() + "]");
-            //for (int i = 0; i <= 19; i++) {
-            for (int i = 19; i >= 0; i--) {// not to replace "$in1" in "$in19"
+            for (int i = 0; i <= 19; i++) {
+            //for (int i = 19; i >= 0; i--) {// not to replace "$in1" in "$in19"
                 //System.out.println("i=["+i+"]");
                 if(i < dataSize){
                     Double valoare = Double.parseDouble(values.get(i));
@@ -238,6 +341,9 @@ public class ReadWrite {
             tmpl.write(output);
             output.close();
             
+            values.clear();
+            descriptions.clear();
+            
         }catch (Exception e) {
             e.printStackTrace();
         } 
@@ -250,6 +356,7 @@ public class ReadWrite {
 
         for (int i = 0; i < r1.numSections(); ++i ) { 
             Section s = r1.getSection(i); 
+            
             for (int x = 0; x < s.numParagraphs(); x++) { 
                 Paragraph p = s.getParagraph(x); 
                 for (int z = 0; z < p.numCharacterRuns(); z++) { 
@@ -264,40 +371,47 @@ public class ReadWrite {
         return doc;
     }
     
-    public void writeXlsx(){
-        
-        File f = new File("/home/liviu/casierieSanpetru.xlsx");
-        try {
-            WritableWorkbook myExcel = Workbook.createWorkbook(f);
-            WritableSheet mySheet =  myExcel.createSheet("saptamanaCurenta", 0);
-            Label l = new Label(0,0,"test1");
-            Label l2 = new Label(0,1,"test2");
-            
-            mySheet.addCell(l);
-            mySheet.addCell(l2);
-            myExcel.write();
-            myExcel.close();
-            
-        }catch (Exception e) {
-            e.printStackTrace();
-        } 
-        
-    }
-    
-    public void writeDocx4j(){
-        try{
-            this.getTemplate("/home/liviu/Documents/proces_verbal_sanpetru.docx");
-        }catch(Docx4JException e){
-            e.printStackTrace();
-        }catch(FileNotFoundException e){
-            e.printStackTrace();
-        }
-    }
     
     private WordprocessingMLPackage getTemplate(String name) throws Docx4JException, FileNotFoundException {
             WordprocessingMLPackage template = WordprocessingMLPackage.load(new FileInputStream(new File(name)));
             return template;
     }
     
+    public void replaceDoc4j(){
+        String rootDir = "D:/Work/CasierieSanpetruExcel/";
+        
+        // create new instance of docx template
+        Docx docx = new Docx(rootDir + "proces_verbal_sanpetru_template2.docx");
+
+        // set the variable pattern. In this example the pattern is as follows: #{variableName}
+        docx.setVariablePattern(new VariablePattern("#{", "}"));
+
+        // read docx content as simple text
+        String content = docx.readTextContent();
+
+        // and display it
+        System.out.println(content); 
+
+        // find all variables satisfying the pattern #{...}
+        List<String> findVariables = docx.findVariables();
+
+        // and display it
+        for (String var : findVariables) {
+                System.out.println("VARIABLE => " + var);
+        }
+
+        // prepare map of variables for template
+        Variables var = new Variables();
+        
+        var.addTextVariable(new TextVariable("#{in0}", "Lukasz"));
+        var.addTextVariable(new TextVariable("#{out0}", "Lukaszaa"));
+        var.addTextVariable(new TextVariable("#{det0}", "Lukasbbz"));
+
+        // fill template by given map of variables
+        docx.fillTemplate(var);
+
+        // save filled document
+        docx.save(rootDir + "output.docx");
+    }
 }
 
