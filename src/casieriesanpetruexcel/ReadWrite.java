@@ -69,10 +69,10 @@ public class ReadWrite {
                 String valoare = line.get(5);
                 String descriere = line.get(2);
                 
-                if(line.get(0).equals("Casierie Sampetru")){
+                if(line.get(0).equals("Casierie Sampetru")) {
                         
                     if(!line.get(1).equals(currentDate)){
-                        System.out.println("Current date: [" + currentDate + "]");
+                        //System.out.println("Current date: [" + currentDate + "]");
                          // changed the day; write te date in the header
                         if(!currentDate.equals("")){
                             
@@ -87,7 +87,7 @@ public class ReadWrite {
                     this.sold+= intValue(Double.parseDouble(valoare));
                     values.add(valoare);
                     descriptions.add(descriere);
-
+                        
                 }
             }
             scanner.close();
@@ -205,18 +205,24 @@ public class ReadWrite {
             tmpl = replaceText(tmpl, "$sold_anterior", this.soldAnterior.toString());
             
             Integer dataSize = values.size();
-            for (int i = 0; i < 19; i++) {
+            System.out.println("Data size is: [" + dataSize.toString() + "]");
+            for (int i = 0; i <= 19; i++) {
+                System.out.println("i=["+i+"]");
                 if(i < dataSize){
                     Double valoare = Double.parseDouble(values.get(i));
                     if(valoare > 0){
                         tmpl = replaceText(tmpl, "$in"+i, values.get(i));
+                        tmpl = replaceText(tmpl, "$out"+i, "");
                     } else {
                         tmpl = replaceText(tmpl, "$out"+i, String.valueOf(Math.abs(valoare)));
+                        tmpl = replaceText(tmpl, "$in"+i, "");
                     }
+                    System.out.println("i=["+i+"] , replacing with [" + descriptions.get(i) + "]");
                     tmpl = replaceText(tmpl, "$det"+i, descriptions.get(i));
                         //System.out.println(values.get(i));
                         //System.out.println(descriptions.get(i));
-                } else {
+                } else { // fill until the end of table with blanks
+                    System.out.println("i=["+i+"] , replacing with blanks");
                     tmpl = replaceText(tmpl, "$in"+i, "");
                     tmpl = replaceText(tmpl, "$out"+i, "");
                     tmpl = replaceText(tmpl, "$det"+i, "");
