@@ -82,7 +82,8 @@ public class ReadWrite {
                         
                     if(!line.get(1).equals(currentDate)){
                         // changed the day; write te date in the header
-                        //System.out.println("Current date: [" + currentDate + "]");
+                        System.out.println("Date chosen: [" + date + "]");
+                        System.out.println("Current date: [" + currentDate + "]");
                         
                         if(!currentDate.equals("")){
                             this.writeDocPoi(currentDate ,values, descriptions);
