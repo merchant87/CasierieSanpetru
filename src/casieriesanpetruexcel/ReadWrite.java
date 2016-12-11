@@ -77,19 +77,20 @@ public class ReadWrite {
                 List<String> line = parseLine(scanner.nextLine());
                 String valoare = line.get(5);
                 String descriere = line.get(2);
-                
+ 
                 if(line.get(0).equals("Casierie Sampetru")) {
                         
                     if(!line.get(1).equals(currentDate)){
                         // changed the day; write te date in the header
                         //System.out.println("Current date: [" + currentDate + "]");
+                        
                         if(!currentDate.equals("")){
                             this.writeDocPoi(currentDate ,values, descriptions);
                         }
                         currentDate = line.get(1);
 
                     }
-                    System.out.println(valoare);
+                    //System.out.println(valoare);
                     this.sold+= intValue(Double.parseDouble(valoare));
                     values.add(valoare);
                     descriptions.add(descriere);
@@ -210,33 +211,34 @@ public class ReadWrite {
         
         try{
             
-            XWPFDocument tmpl = new XWPFDocument(OPCPackage.open(rootDir + "proces_verbal_sanpetru_template.docx")); 
+            XWPFDocument tmpl = new XWPFDocument(OPCPackage.open(rootDir + "proces_verbal_sanpetru_template3.docx")); 
             
             tmpl = replaceTextDocx(tmpl, "$sold_anterior", this.soldAnterior.toString());
             
             Integer dataSize = values.size();
             //System.out.println("Data size is: [" + dataSize.toString() + "]");
+            
             //for (int i = 0; i <= 19; i++) {
             for (int i = 19; i >= 0; i--) {// not to replace "$in1" in "$in19"
                 //System.out.println("i=["+i+"]");
                 if(i < dataSize){
                     Double valoare = Double.parseDouble(values.get(i));
                     if(valoare > 0){
-                        System.out.println("i=["+i+"] , replacing [$in"+i+"] with [" + values.get(i) + "]");
+                        //System.out.println("i=["+i+"] , replacing [$in"+i+"] with [" + values.get(i) + "]");
                         tmpl = replaceTextDocx(tmpl, "$in"+i, values.get(i));
                         tmpl = replaceTextDocx(tmpl, "$out"+i, "");
                     } else {
-                        System.out.println("i=["+i+"] , replacing [$out"+i+"] with [" + valoare + "]");
+                        //System.out.println("i=["+i+"] , replacing [$out"+i+"] with [" + valoare + "]"); 
                         tmpl = replaceTextDocx(tmpl, "$out"+i, String.valueOf(Math.abs(valoare)));
                         tmpl = replaceTextDocx(tmpl, "$in"+i, "");
                     }
-                    System.out.println("i=["+i+"] , replacing with [" + descriptions.get(i) + "]");
+                    //System.out.println("i=["+i+"] , replacing with [" + descriptions.get(i) + "]");
                     tmpl = replaceTextDocx(tmpl, "$det"+i, descriptions.get(i));
                         
                 } else { // fill until the end of table with blanks
-                    System.out.println("i=["+i+"] , replacing [$in"+i+"] with blanks");
-                    System.out.println("i=["+i+"] , replacing [$out"+i+"] with blanks");
-                    System.out.println("i=["+i+"] , replacing [$det"+i+"] with blanks");
+                    //System.out.println("i=["+i+"] , replacing [$in"+i+"] with blanks");
+                    //System.out.println("i=["+i+"] , replacing [$out"+i+"] with blanks");
+                    //System.out.println("i=["+i+"] , replacing [$det"+i+"] with blanks");
                     tmpl = replaceTextDocx(tmpl, "$in"+i, "");
                     tmpl = replaceTextDocx(tmpl, "$out"+i, "");
                     tmpl = replaceTextDocx(tmpl, "$det"+i, "");
@@ -245,6 +247,7 @@ public class ReadWrite {
             //System.out.println("----------------------------");
             tmpl = replaceTextDocx(tmpl, "$sold", this.sold.toString());
             
+            //tmpl = replaceTextDocx(tmpl, "$out0", "abcd");
             this.soldAnterior = this.sold;
             
             FileOutputStream output = new FileOutputStream(rootDir + "proces_verbal_sanpetru_" + date + ".docx");
@@ -279,6 +282,7 @@ public class ReadWrite {
                  for (XWPFParagraph p : cell.getParagraphs()) {
                     for (XWPFRun r : p.getRuns()) {
                       String text = r.getText(0);
+                      //System.out.println(text);
                       if (text.contains(findText)) {
                         text = text.replace(findText, replaceText);
                         r.setText(text);
@@ -300,17 +304,18 @@ public class ReadWrite {
         String rootDir = "D:/Work/CasierieSanpetruExcel/";
         // load template
         try{
-            FileInputStream input = new FileInputStream(rootDir+"proces_verbal_sanpetru_template.doc");
+            FileInputStream input = new FileInputStream(rootDir+"proces_verbal_sanpetru_template3.doc");
             // class used to extract content
             HWPFDocument tmpl = new HWPFDocument(input);
             
-            System.out.println(date);
+            //System.out.println(date);
             tmpl = replaceText(tmpl, "$sold_anterior", this.soldAnterior.toString());
             
             Integer dataSize = values.size();
-            System.out.println("Data size is: [" + dataSize.toString() + "]");
-            for (int i = 0; i <= 19; i++) {
-            //for (int i = 19; i >= 0; i--) {// not to replace "$in1" in "$in19"
+            
+            //System.out.println("Data size is: [" + dataSize.toString() + "]");
+            //for (int i = 0; i <= 19; i++) {
+            for (int i = 19; i >= 0; i--) {// not to replace "$in1" in "$in19"
                 //System.out.println("i=["+i+"]");
                 if(i < dataSize){
                     Double valoare = Double.parseDouble(values.get(i));
@@ -335,6 +340,8 @@ public class ReadWrite {
             }
             //System.out.println("----------------------------");
             tmpl = replaceText(tmpl, "$sold", this.sold.toString());
+            
+            //tmpl = replaceText(tmpl, "$out0", "abcd");
             this.soldAnterior = this.sold;
             
             FileOutputStream output = new FileOutputStream(rootDir+"proces_verbal_sanpetru_"+date+".doc");
@@ -390,14 +397,14 @@ public class ReadWrite {
         String content = docx.readTextContent();
 
         // and display it
-        System.out.println(content); 
+        //System.out.println(content); 
 
         // find all variables satisfying the pattern #{...}
         List<String> findVariables = docx.findVariables();
 
         // and display it
         for (String var : findVariables) {
-                System.out.println("VARIABLE => " + var);
+                //System.out.println("VARIABLE => " + var);
         }
 
         // prepare map of variables for template
