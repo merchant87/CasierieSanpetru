@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -64,7 +65,6 @@ public class ReadWrite {
                         currentDate = line.get(1);
 
                     }
-                    //System.out.println(valoare);
                     this.sold+= intValue(Double.parseDouble(valoare));
                     values.add(valoare);
                     descriptions.add(descriere);
@@ -199,7 +199,20 @@ public class ReadWrite {
             Cell cellDate = my_worksheet.getRow(0).getCell(4);
             
             cellSoldAnterior.setCellValue(this.soldAnterior);
-            cellDate.setCellValue("Data: " + date);
+            
+            //changing date pattern
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("MM-d-yyyy");
+                Date d = sdf.parse(date);
+                sdf.applyPattern("dd.MM.yyyy");
+                String romanianDate = sdf.format(d);
+
+                cellDate.setCellValue("Data: " + romanianDate);
+            
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            
                     
             Integer dataSize = values.size();
             //System.out.println("Data size is: [" + dataSize.toString() + "]");
@@ -228,6 +241,8 @@ public class ReadWrite {
             cellSold.setCellValue(this.sold);
             
             this.soldAnterior = this.sold;
+            values.clear();
+            descriptions.clear();            
             //important to close InputStream
             input_document.close();
             //Open FileOutputStream to write updates
