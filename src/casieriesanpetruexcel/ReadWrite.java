@@ -5,13 +5,7 @@
  */
 package casieriesanpetruexcel;
 
-import java.awt.Cursor;
-import java.awt.Desktop;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.io.BufferedReader;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 
 import java.io.File;
@@ -20,42 +14,12 @@ import java.io.FileOutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import javax.swing.JLabel;
-import jxl.Workbook;
-import jxl.write.Label;
-import jxl.write.WritableSheet;
-import jxl.write.WritableWorkbook;
-import org.apache.poi.hwpf.HWPFDocument;
-import org.apache.poi.hwpf.extractor.WordExtractor;
-import org.apache.poi.hwpf.usermodel.CharacterRun;
-import org.apache.poi.hwpf.usermodel.Paragraph;
-import org.apache.poi.hwpf.usermodel.Range;
-import org.apache.poi.hwpf.usermodel.Section;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.poi.xwpf.usermodel.XWPFParagraph;
-import org.apache.xmlbeans.XmlException;
-import org.docx4j.openpackaging.exceptions.Docx4JException;
-import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 
 import java.util.*;
 import static oracle.jrockit.jfr.events.Bits.intValue;
-import org.apache.poi.hssf.usermodel.HSSFDataFormat;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.openxml4j.opc.OPCPackage;
-import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.poi.xwpf.usermodel.XWPFRun;
-import org.apache.poi.xwpf.usermodel.XWPFTable;
-import org.apache.poi.xwpf.usermodel.XWPFTableCell;
-import org.apache.poi.xwpf.usermodel.XWPFTableRow;
-import pl.jsolve.templ4docx.core.Docx;
-import pl.jsolve.templ4docx.core.VariablePattern;
-import pl.jsolve.templ4docx.variable.TextVariable;
-import pl.jsolve.templ4docx.variable.Variables;
 /**
  *
  * @author liviu
@@ -95,7 +59,6 @@ public class ReadWrite {
                         //System.out.println("Current date: [" + currentDate + "]");
                         
                         if(!currentDate.equals("")){
-                            //this.writeDocPoi(currentDate ,values, descriptions);
                             this.writeXlsXPoi(currentDate ,values, descriptions);
                         }
                         currentDate = line.get(1);
@@ -114,7 +77,7 @@ public class ReadWrite {
             //  so we check that if data is not empty after the iteration
             //  it means it has to be written
             if(!values.isEmpty()){// last set of data
-                this.writeDocPoi(currentDate ,values, descriptions);
+                this.writeXlsXPoi(currentDate ,values, descriptions);
             }
             
             scanner.close();
@@ -230,13 +193,7 @@ public class ReadWrite {
             XSSFWorkbook my_xlsx_workbook = new XSSFWorkbook(input_document); 
             // Read excel sheet that needs to be updated
             XSSFSheet my_worksheet = my_xlsx_workbook.getSheetAt(0); 
-            // declare a Cell object
-            //Cell cell = null; 
-            // Access the cell first to update the value
-            //cell = my_worksheet.getRow(2).getCell(1);
-            // Get current value and reduce 5 from it
-            //cell.setCellValue(cell.getNumericCellValue() - 5);
-            
+            // declare a Cell object            
             Cell cellSoldAnterior = my_worksheet.getRow(4).getCell(3);
             Cell cellSold = my_worksheet.getRow(28).getCell(2);
             Cell cellDate = my_worksheet.getRow(0).getCell(4);
@@ -247,10 +204,8 @@ public class ReadWrite {
             Integer dataSize = values.size();
             //System.out.println("Data size is: [" + dataSize.toString() + "]");
             
-            for (int i = 19; i >= 0; i--) {// not to replace "$in1" in "$in19"
-                //System.out.println("i=["+i+"]");
-                
-                
+            for (int i = 0; i < 20; i++) {
+
                 if(i < dataSize){
                     Cell cellIn = my_worksheet.getRow(i+7).getCell(2);
                     Cell cellOut = my_worksheet.getRow(i+7).getCell(3);
@@ -289,220 +244,5 @@ public class ReadWrite {
             e.printStackTrace();
         }
     }
-    
-    public void writeDocxPoi(String date, ArrayList<String> values, ArrayList<String> descriptions){
-        String rootDir = "D:/Work/CasierieSanpetruExcel/";
-        
-        try{
-            
-            XWPFDocument tmpl = new XWPFDocument(OPCPackage.open(rootDir + "proces_verbal_sanpetru_template3.docx")); 
-            
-            tmpl = replaceTextDocx(tmpl, "$sold_anterior", this.soldAnterior.toString());
-            
-            Integer dataSize = values.size();
-            //System.out.println("Data size is: [" + dataSize.toString() + "]");
-            
-            //for (int i = 0; i <= 19; i++) {
-            for (int i = 19; i >= 0; i--) {// not to replace "$in1" in "$in19"
-                //System.out.println("i=["+i+"]");
-                if(i < dataSize){
-                    Double valoare = Double.parseDouble(values.get(i));
-                    if(valoare > 0){
-                        //System.out.println("i=["+i+"] , replacing [$in"+i+"] with [" + values.get(i) + "]");
-                        tmpl = replaceTextDocx(tmpl, "$in"+i, values.get(i));
-                        tmpl = replaceTextDocx(tmpl, "$out"+i, "");
-                    } else {
-                        //System.out.println("i=["+i+"] , replacing [$out"+i+"] with [" + valoare + "]"); 
-                        tmpl = replaceTextDocx(tmpl, "$out"+i, String.valueOf(Math.abs(valoare)));
-                        tmpl = replaceTextDocx(tmpl, "$in"+i, "");
-                    }
-                    //System.out.println("i=["+i+"] , replacing with [" + descriptions.get(i) + "]");
-                    tmpl = replaceTextDocx(tmpl, "$det"+i, descriptions.get(i));
-                        
-                } else { // fill until the end of table with blanks
-                    //System.out.println("i=["+i+"] , replacing [$in"+i+"] with blanks");
-                    //System.out.println("i=["+i+"] , replacing [$out"+i+"] with blanks");
-                    //System.out.println("i=["+i+"] , replacing [$det"+i+"] with blanks");
-                    tmpl = replaceTextDocx(tmpl, "$in"+i, "");
-                    tmpl = replaceTextDocx(tmpl, "$out"+i, "");
-                    tmpl = replaceTextDocx(tmpl, "$det"+i, "");
-                }
-            }
-            //System.out.println("----------------------------");
-            tmpl = replaceTextDocx(tmpl, "$sold", this.sold.toString());
-            
-            //tmpl = replaceTextDocx(tmpl, "$out0", "abcd");
-            this.soldAnterior = this.sold;
-            
-            FileOutputStream output = new FileOutputStream(rootDir + "proces_verbal_sanpetru_" + date + ".docx");
-            tmpl.write(output);
-            output.close();
-            
-            values.clear();
-            descriptions.clear();
-            
-        }catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-    
-    public XWPFDocument replaceTextDocx(XWPFDocument doc, String findText, String replaceText){
-        
-        for (XWPFParagraph p : doc.getParagraphs()) {
-            List<XWPFRun> runs = p.getRuns();
-            if (runs != null) {
-                for (XWPFRun r : runs) {
-                    String text = r.getText(0);
-                    if (text != null && text.contains(findText)) {
-                        text = text.replace(findText, replaceText);
-                        r.setText(text, 0);
-                    }
-                }
-            }
-        }
-        for (XWPFTable tbl : doc.getTables()) {
-           for (XWPFTableRow row : tbl.getRows()) {
-              for (XWPFTableCell cell : row.getTableCells()) {
-                 for (XWPFParagraph p : cell.getParagraphs()) {
-                    for (XWPFRun r : p.getRuns()) {
-                      String text = r.getText(0);
-                      //System.out.println(text);
-                      if (text.contains(findText)) {
-                        text = text.replace(findText, replaceText);
-                        r.setText(text);
-                      }
-                    }
-                 }
-              }
-           }
-        }    
-         
-        
-        return doc;
-    }
-        
-    public void writeDocPoi(String date, ArrayList<String> values, ArrayList<String> descriptions){
-        //DateFormat df = new SimpleDateFormat("yyyyMMdd");
-        //String sdt = df.format(new Date());
-        
-        String rootDir = "D:/Work/CasierieSanpetruExcel/";
-        // load template
-        try{
-            FileInputStream input = new FileInputStream(rootDir+"proces_verbal_sanpetru_template3.doc");
-            // class used to extract content
-            HWPFDocument tmpl = new HWPFDocument(input);
-            
-            //System.out.println(date);
-            tmpl = replaceText(tmpl, "$sold_anterior", this.soldAnterior.toString());
-            
-            Integer dataSize = values.size();
-            
-            //System.out.println("Data size is: [" + dataSize.toString() + "]");
-            //for (int i = 0; i <= 19; i++) {
-            for (int i = 19; i >= 0; i--) {// not to replace "$in1" in "$in19"
-                //System.out.println("i=["+i+"]");
-                if(i < dataSize){
-                    Double valoare = Double.parseDouble(values.get(i));
-                    if(valoare > 0){
-                        tmpl = replaceText(tmpl, "$in"+i, values.get(i));
-                        tmpl = replaceText(tmpl, "$out"+i, "");
-                    } else {
-                        tmpl = replaceText(tmpl, "$out"+i, String.valueOf(Math.abs(valoare)));
-                        tmpl = replaceText(tmpl, "$in"+i, "");
-                    }
-                    System.out.println("i=["+i+"] , replacing with [" + descriptions.get(i) + "]");
-                    tmpl = replaceText(tmpl, "$det"+i, descriptions.get(i));
-                        
-                } else { // fill until the end of table with blanks
-                    System.out.println("i=["+i+"] , replacing [$in"+i+"] with blanks");
-                    System.out.println("i=["+i+"] , replacing [$out"+i+"] with blanks");
-                    System.out.println("i=["+i+"] , replacing [$det"+i+"] with blanks");
-                    tmpl = replaceText(tmpl, "$in"+i, "");
-                    tmpl = replaceText(tmpl, "$out"+i, "");
-                    tmpl = replaceText(tmpl, "$det"+i, "");
-                }
-            }
-            //System.out.println("----------------------------");
-            tmpl = replaceText(tmpl, "$sold", this.sold.toString());
-            
-            //tmpl = replaceText(tmpl, "$out0", "abcd");
-            this.soldAnterior = this.sold;
-            
-            FileOutputStream output = new FileOutputStream(rootDir+"proces_verbal_sanpetru_"+date+".doc");
-            tmpl.write(output);
-            output.close();
-            
-            values.clear();
-            descriptions.clear();
-            
-        }catch (Exception e) {
-            e.printStackTrace();
-        } 
-        
-
-    }
-    
-    private static HWPFDocument replaceText(HWPFDocument doc, String findText, String replaceText){
-        Range r1 = doc.getRange(); 
-
-        for (int i = 0; i < r1.numSections(); ++i ) { 
-            Section s = r1.getSection(i); 
-            
-            for (int x = 0; x < s.numParagraphs(); x++) { 
-                Paragraph p = s.getParagraph(x); 
-                for (int z = 0; z < p.numCharacterRuns(); z++) { 
-                    CharacterRun run = p.getCharacterRun(z); 
-                    String text = run.text();
-                    if(text.contains(findText)) {
-                        run.replaceText(findText, replaceText);
-                    } 
-                }
-            }
-        } 
-        return doc;
-    }
-    
-    
-    private WordprocessingMLPackage getTemplate(String name) throws Docx4JException, FileNotFoundException {
-            WordprocessingMLPackage template = WordprocessingMLPackage.load(new FileInputStream(new File(name)));
-            return template;
-    }
-    
-    public void replaceDoc4j(){
-        String rootDir = "D:/Work/CasierieSanpetruExcel/";
-        
-        // create new instance of docx template
-        Docx docx = new Docx(rootDir + "proces_verbal_sanpetru_template2.docx");
-
-        // set the variable pattern. In this example the pattern is as follows: #{variableName}
-        docx.setVariablePattern(new VariablePattern("#{", "}"));
-
-        // read docx content as simple text
-        String content = docx.readTextContent();
-
-        // and display it
-        //System.out.println(content); 
-
-        // find all variables satisfying the pattern #{...}
-        List<String> findVariables = docx.findVariables();
-
-        // and display it
-        for (String var : findVariables) {
-                //System.out.println("VARIABLE => " + var);
-        }
-
-        // prepare map of variables for template
-        Variables var = new Variables();
-        
-        var.addTextVariable(new TextVariable("#{in0}", "Lukasz"));
-        var.addTextVariable(new TextVariable("#{out0}", "Lukaszaa"));
-        var.addTextVariable(new TextVariable("#{det0}", "Lukasbbz"));
-
-        // fill template by given map of variables
-        docx.fillTemplate(var);
-
-        // save filled document
-        docx.save(rootDir + "output.docx");
-    }
+  
 }
-
