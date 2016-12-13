@@ -40,7 +40,14 @@ import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 
 import java.util.*;
 import static oracle.jrockit.jfr.events.Bits.intValue;
+import org.apache.poi.hssf.usermodel.HSSFDataFormat;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableCell;
@@ -60,6 +67,8 @@ public class ReadWrite {
     
     private static final char DEFAULT_SEPARATOR = ',';
     private static final char DEFAULT_QUOTE = '"';
+    
+    private final String rootDir = "D:/Work/CasierieSanpetruExcel/";
     
     public ReadWrite(){
         
@@ -82,11 +91,12 @@ public class ReadWrite {
                         
                     if(!line.get(1).equals(currentDate)){
                         // changed the day; write te date in the header
-                        System.out.println("Date chosen: [" + date + "]");
-                        System.out.println("Current date: [" + currentDate + "]");
+                        //System.out.println("Date chosen: [" + date + "]");
+                        //System.out.println("Current date: [" + currentDate + "]");
                         
                         if(!currentDate.equals("")){
-                            this.writeDocPoi(currentDate ,values, descriptions);
+                            //this.writeDocPoi(currentDate ,values, descriptions);
+                            this.writeXlsXPoi(currentDate ,values, descriptions);
                         }
                         currentDate = line.get(1);
 
@@ -205,6 +215,79 @@ public class ReadWrite {
         result.add(curVal.toString());
 
         return result;
+    }
+    
+    
+    
+    private void writeXlsXPoi(String date, ArrayList<String> values, ArrayList<String> descriptions){
+        
+        
+        try {
+            
+            //Read Excel document first
+            FileInputStream input_document = new FileInputStream(new File(this.rootDir + "proces_verbal_sanpetru_template.xlsx"));
+            // convert it into a POI object
+            XSSFWorkbook my_xlsx_workbook = new XSSFWorkbook(input_document); 
+            // Read excel sheet that needs to be updated
+            XSSFSheet my_worksheet = my_xlsx_workbook.getSheetAt(0); 
+            // declare a Cell object
+            //Cell cell = null; 
+            // Access the cell first to update the value
+            //cell = my_worksheet.getRow(2).getCell(1);
+            // Get current value and reduce 5 from it
+            //cell.setCellValue(cell.getNumericCellValue() - 5);
+            
+            Cell cellSoldAnterior = my_worksheet.getRow(4).getCell(3);
+            Cell cellSold = my_worksheet.getRow(28).getCell(2);
+            Cell cellDate = my_worksheet.getRow(0).getCell(4);
+            
+            cellSoldAnterior.setCellValue(this.soldAnterior);
+            cellDate.setCellValue("Data: " + date);
+                    
+            Integer dataSize = values.size();
+            //System.out.println("Data size is: [" + dataSize.toString() + "]");
+            
+            for (int i = 19; i >= 0; i--) {// not to replace "$in1" in "$in19"
+                //System.out.println("i=["+i+"]");
+                
+                
+                if(i < dataSize){
+                    Cell cellIn = my_worksheet.getRow(i+7).getCell(2);
+                    Cell cellOut = my_worksheet.getRow(i+7).getCell(3);
+                    Cell cellDesc = my_worksheet.getRow(i+7).getCell(4);
+                
+                    Double valoare = Double.parseDouble(values.get(i));
+                    if(valoare > 0){
+                        //System.out.println("i=["+i+"] , replacing [$in"+i+"] with [" + values.get(i) + "]");
+                        cellIn.setCellValue(valoare);
+                    } else {
+                        //System.out.println("i=["+i+"] , replacing [$out"+i+"] with [" + valoare + "]"); 
+                        cellOut.setCellValue(Math.abs(valoare));
+                    }
+                    //System.out.println("i=["+i+"] , replacing with [" + descriptions.get(i) + "]");
+                   cellDesc.setCellValue(descriptions.get(i));
+                        
+                }
+            }
+            //System.out.println("----------------------------");
+            cellSold.setCellValue(this.sold);
+            
+            this.soldAnterior = this.sold;
+            //important to close InputStream
+            input_document.close();
+            //Open FileOutputStream to write updates
+            FileOutputStream output_file =new FileOutputStream(new File(this.rootDir + "proces_verbal_sanpetru_" + date + ".xlsx"));
+            //write changes
+            my_xlsx_workbook.write(output_file);
+            //close the stream
+            output_file.close(); 
+
+            
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     
     public void writeDocxPoi(String date, ArrayList<String> values, ArrayList<String> descriptions){
