@@ -37,7 +37,7 @@ public class MainGUI {
     
     JDatePickerImpl datePicker;
     
-    //public JTextField txtdata;
+    public JComboBox operatori;
     
     
     public MainGUI(){
@@ -86,8 +86,8 @@ public class MainGUI {
                 //System.out.println("File Chose is: " + fileChose);
                 ReadWrite rw = new ReadWrite();
                 
-                rw.read(fileChosen, datePicker.getJFormattedTextField().getText());
-                //rw.writeDocxPoi();
+                rw.read(fileChosen, datePicker.getJFormattedTextField().getText(), operatori.getSelectedItem().toString());
+             
                 
             }
             
@@ -108,10 +108,17 @@ public class MainGUI {
         
         mainPanel.add(lblFileLink);
 
+        String[] strOperatori = {"<", "=", ">"};
+        
+        operatori = new JComboBox(strOperatori);
+        operatori.setSelectedIndex(2);
+        operatori.setBounds(250,350,50,30);
+        mainPanel.add(operatori);
+        
         UtilDateModel model=new UtilDateModel();
         JDatePanelImpl datePanel = new JDatePanelImpl(model);
         datePicker = new JDatePickerImpl(datePanel, new DateLabelFormatter());
-        datePicker.setBounds(220,350,120,30);
+        datePicker.setBounds(280,350,120,30);
         mainPanel.add(datePicker);
    
         mainFrame.setVisible(true);

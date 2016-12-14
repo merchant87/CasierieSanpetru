@@ -39,7 +39,8 @@ public class ReadWrite {
         
     }
     
-    public void read(String file, String date){
+    public void read(String file, String date, String operator){
+        //System.out.println(operator);
         String currentDate = "";
                 
         ArrayList<String> values = new ArrayList<String>();
@@ -51,24 +52,43 @@ public class ReadWrite {
                 List<String> line = parseLine(scanner.nextLine());
                 String valoare = line.get(5);
                 String descriere = line.get(2);
- 
+                Date selectedDate, rowDate;
+                
+                
+                
                 if(line.get(0).equals("Casierie Sampetru")) {
-                        
-                    if(!line.get(1).equals(currentDate)){
-                        // changed the day; write te date in the header
-                        //System.out.println("Date chosen: [" + date + "]");
-                        //System.out.println("Current date: [" + currentDate + "]");
-                        
-                        if(!currentDate.equals("")){
-                            this.writeXlsXPoi(currentDate ,values, descriptions);
-                        }
-                        currentDate = line.get(1);
+                    this.soldAnterior = this.sold;
+                    try{
+                        SimpleDateFormat sdf = new SimpleDateFormat("MM-d-yyyy");
+                        selectedDate = sdf.parse(date);
 
-                    }
-                    this.sold+= intValue(Double.parseDouble(valoare));
-                    values.add(valoare);
-                    descriptions.add(descriere);
+                        rowDate = sdf.parse(line.get(1));
                         
+                        if(operator.equals("=") && rowDate.equals(selectedDate) ||
+                           operator.equals("<") && (rowDate.before(selectedDate) || rowDate.equals(selectedDate)) ||
+                           operator.equals(">") && (rowDate.after(selectedDate) || rowDate.equals(selectedDate))
+                           ){
+                           if(!line.get(1).equals(currentDate)){
+                                // changed the day; write te date in the header
+                                //System.out.println("Date chosen: [" + date + "]");
+                                //System.out.println("Current date: [" + currentDate + "]");
+
+                                if(!currentDate.equals("")){
+                                    this.writeXlsXPoi(currentDate ,values, descriptions);
+                                }
+                                currentDate = line.get(1);
+
+                            }
+                            
+                            values.add(valoare);
+                            descriptions.add(descriere);
+                        }
+                        this.sold+= intValue(Double.parseDouble(valoare));
+                        
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                    
                 }
             }
             
@@ -240,7 +260,7 @@ public class ReadWrite {
             //System.out.println("----------------------------");
             cellSold.setCellValue(this.sold);
             
-            this.soldAnterior = this.sold;
+//            this.soldAnterior = this.sold;
             values.clear();
             descriptions.clear();            
             //important to close InputStream
