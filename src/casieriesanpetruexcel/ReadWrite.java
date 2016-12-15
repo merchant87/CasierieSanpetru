@@ -40,7 +40,6 @@ public class ReadWrite {
     }
     
     public void read(String file, String date, String operator){
-        //System.out.println(operator);
         String currentDate = "";
                 
         ArrayList<String> values = new ArrayList<String>();
@@ -57,33 +56,33 @@ public class ReadWrite {
                 
                 
                 if(line.get(0).equals("Casierie Sampetru")) {
-                    this.soldAnterior = this.sold;
+                    
                     try{
                         SimpleDateFormat sdf = new SimpleDateFormat("MM-d-yyyy");
                         selectedDate = sdf.parse(date);
 
                         rowDate = sdf.parse(line.get(1));
                         
+                        
                         if(operator.equals("=") && rowDate.equals(selectedDate) ||
                            operator.equals("<") && (rowDate.before(selectedDate) || rowDate.equals(selectedDate)) ||
                            operator.equals(">") && (rowDate.after(selectedDate) || rowDate.equals(selectedDate))
                            ){
                            if(!line.get(1).equals(currentDate)){
-                                // changed the day; write te date in the header
-                                //System.out.println("Date chosen: [" + date + "]");
-                                //System.out.println("Current date: [" + currentDate + "]");
-
+                                
                                 if(!currentDate.equals("")){
+                                    //System.out.println(" in LOOP Current date: [" + currentDate + "]");
                                     this.writeXlsXPoi(currentDate ,values, descriptions);
-                                }
+                                } 
                                 currentDate = line.get(1);
 
                             }
                             
                             values.add(valoare);
                             descriptions.add(descriere);
+                            
+                            this.sold+= intValue(Double.parseDouble(valoare));
                         }
-                        this.sold+= intValue(Double.parseDouble(valoare));
                         
                     } catch (ParseException e) {
                         e.printStackTrace();
@@ -97,6 +96,8 @@ public class ReadWrite {
             //  so we check that if data is not empty after the iteration
             //  it means it has to be written
             if(!values.isEmpty()){// last set of data
+                //System.out.println(" OUT OF LOOP Current date: [" + currentDate + "]");
+                //System.out.println("values: " + values.toString());
                 this.writeXlsXPoi(currentDate ,values, descriptions);
             }
             
@@ -218,7 +219,7 @@ public class ReadWrite {
             Cell cellSold = my_worksheet.getRow(28).getCell(2);
             Cell cellDate = my_worksheet.getRow(0).getCell(4);
             
-            cellSoldAnterior.setCellValue(this.soldAnterior);
+            
             
             //changing date pattern
             try {
@@ -246,27 +247,32 @@ public class ReadWrite {
                 
                     Double valoare = Double.parseDouble(values.get(i));
                     if(valoare > 0){
-                        //System.out.println("i=["+i+"] , replacing [$in"+i+"] with [" + values.get(i) + "]");
                         cellIn.setCellValue(valoare);
+                        //this.soldAnterior -= intValue(Math.abs(valoare));
                     } else {
-                        //System.out.println("i=["+i+"] , replacing [$out"+i+"] with [" + valoare + "]"); 
                         cellOut.setCellValue(Math.abs(valoare));
+                        //this.soldAnterior += intValue(Math.abs(valoare));
                     }
-                    //System.out.println("i=["+i+"] , replacing with [" + descriptions.get(i) + "]");
-                   cellDesc.setCellValue(descriptions.get(i));
-                        
+                    cellDesc.setCellValue(descriptions.get(i));
+                    //System.out.println("valoare: " + valoare);
                 }
             }
-            //System.out.println("----------------------------");
+            
+            this.soldAnterior = this.sold;
+            for(int i = 0; i < dataSize; i++){
+                Double valoare = Double.parseDouble(values.get(i));
+                this.soldAnterior -= intValue(valoare);
+            }
+            cellSoldAnterior.setCellValue(this.soldAnterior);
+            
             cellSold.setCellValue(this.sold);
             
-//            this.soldAnterior = this.sold;
             values.clear();
             descriptions.clear();            
             //important to close InputStream
             input_document.close();
             //Open FileOutputStream to write updates
-            FileOutputStream output_file =new FileOutputStream(new File(this.rootDir + "proces_verbal_sanpetru_" + date + ".xlsx"));
+            FileOutputStream output_file =new FileOutputStream(new File(this.rootDir + "output/proces_verbal_sanpetru_" + date + ".xlsx"));
             //write changes
             my_xlsx_workbook.write(output_file);
             //close the stream
