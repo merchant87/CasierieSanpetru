@@ -219,7 +219,7 @@ public class ReadWrite {
             Cell cellSold = my_worksheet.getRow(28).getCell(2);
             Cell cellDate = my_worksheet.getRow(0).getCell(4);
             
-            
+            String exportDate = "";
             
             //changing date pattern
             try {
@@ -228,6 +228,9 @@ public class ReadWrite {
                 sdf.applyPattern("dd.MM.yyyy");
                 String romanianDate = sdf.format(d);
 
+                sdf.applyPattern("yyyy-MM-dd");
+                exportDate = sdf.format(d);
+                
                 cellDate.setCellValue("Data: " + romanianDate);
             
             } catch (ParseException e) {
@@ -272,7 +275,7 @@ public class ReadWrite {
             //important to close InputStream
             input_document.close();
             //Open FileOutputStream to write updates
-            FileOutputStream output_file =new FileOutputStream(new File(this.rootDir + "output/proces_verbal_sanpetru_" + date + ".xlsx"));
+            FileOutputStream output_file =new FileOutputStream(new File(this.rootDir + "output/proces_verbal_sanpetru_" + exportDate + ".xlsx"));
             //write changes
             my_xlsx_workbook.write(output_file);
             //close the stream
