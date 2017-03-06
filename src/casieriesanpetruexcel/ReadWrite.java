@@ -213,7 +213,8 @@ public class ReadWrite {
             // convert it into a POI object
             XSSFWorkbook my_xlsx_workbook = new XSSFWorkbook(input_document); 
             // Read excel sheet that needs to be updated
-            XSSFSheet my_worksheet = my_xlsx_workbook.getSheetAt(0); 
+            XSSFSheet my_worksheet = my_xlsx_workbook.getSheetAt(0);
+            
             // declare a Cell object            
             Cell cellSoldAnterior = my_worksheet.getRow(4).getCell(3);
             Cell cellSold = my_worksheet.getRow(28).getCell(2);
@@ -270,12 +271,13 @@ public class ReadWrite {
             //important to close InputStream
             input_document.close();
             //Open FileOutputStream to write updates
-            FileOutputStream output_file = new FileOutputStream(new File(this.rootDir + "output/proces_verbal_sanpetru_" + date + ".xlsx"));
+            FileOutputStream output_file = new FileOutputStream(new File(this.rootDir + "output/proces_verbal_sanpetru_" + date + ".xlsx"));          
+            my_xlsx_workbook.removeSheetAt(2);
+            my_xlsx_workbook.removeSheetAt(1);
             //write changes
-            my_xlsx_workbook.write(output_file);
+            my_xlsx_workbook.write(output_file);           
             //close the stream
             output_file.close(); 
-
             
         } catch (FileNotFoundException e) {
             e.printStackTrace();
