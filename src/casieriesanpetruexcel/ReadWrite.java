@@ -27,13 +27,13 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  */
 public class ReadWrite {
     
-    Integer sold = 0;
-    Integer soldAnterior = 0;
+    Integer sold = 3067;
+    Integer soldAnterior = 3067;
     
     private static final char DEFAULT_SEPARATOR = ',';
     private static final char DEFAULT_QUOTE = '"';
     
-    private final String rootDir = "D:/Work/CasierieSanpetruExcel/";
+    private final String rootDir = "./assets/";
     
     public ReadWrite(){
         
@@ -219,20 +219,15 @@ public class ReadWrite {
             Cell cellSold = my_worksheet.getRow(28).getCell(2);
             Cell cellDate = my_worksheet.getRow(0).getCell(4);
             
-            String exportDate = "";
-            
             //changing date pattern
             try {
-                SimpleDateFormat sdf = new SimpleDateFormat("MM-d-yyyy");
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 Date d = sdf.parse(date);
                 sdf.applyPattern("dd.MM.yyyy");
                 String romanianDate = sdf.format(d);
-
-                sdf.applyPattern("yyyy-MM-dd");
-                exportDate = sdf.format(d);
                 
                 cellDate.setCellValue("Data: " + romanianDate);
-            
+                System.out.println("Date: " + date);
             } catch (ParseException e) {
                 e.printStackTrace();
             }
@@ -275,7 +270,7 @@ public class ReadWrite {
             //important to close InputStream
             input_document.close();
             //Open FileOutputStream to write updates
-            FileOutputStream output_file =new FileOutputStream(new File(this.rootDir + "output/proces_verbal_sanpetru_" + exportDate + ".xlsx"));
+            FileOutputStream output_file = new FileOutputStream(new File(this.rootDir + "output/proces_verbal_sanpetru_" + date + ".xlsx"));
             //write changes
             my_xlsx_workbook.write(output_file);
             //close the stream
