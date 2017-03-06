@@ -5,59 +5,17 @@
  */
 package casieriesanpetruexcel;
 
-import java.awt.Color;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-
 /**
  *
  * @author liviu
  */
 public class SwingGUI extends javax.swing.JFrame {
-    /*
-    private JPanel  mainPanel;
-    private JFrame  mainFrame;
-    private JButton importBtn;
-    private JLabel  srcLabel;
-    
-    private JFileChooser fileChooser;
-    */
 
     /**
      * Creates new form MainGUI
      */
     public SwingGUI() {
         initComponents();
-        /*
-        mainFrame = new JFrame("Import CSV");
-        mainFrame.setVisible(true);
-        mainFrame.setSize(600, 400);
-        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        
-        mainPanel = new JPanel(new GridBagLayout()); // arangeable components in panel
-        mainPanel.setBackground(Color.WHITE);
-        
-        importBtn = new JButton("Alege Fisier");
-        
-        srcLabel = new JLabel("Nici un fisier ales ...");
-        
-        GridBagConstraints c = new GridBagConstraints();
-        c.insets = new Insets(10, 10, 10 , 10);
-        c.gridx = 0;
-        c.gridy = 1;
-        
-        mainPanel.add(importBtn, c);
-
-        mainPanel.add(srcLabel);
-        
-        mainFrame.add(mainPanel);
-        */
     }
 
     /**

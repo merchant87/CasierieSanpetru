@@ -50,7 +50,7 @@ public class MainGUI {
                 JFileChooser fc = new JFileChooser();
                 FileFilter filter = new FileNameExtensionFilter("CSV file", "csv");
                 fc.setFileFilter(filter);
-                fc.setCurrentDirectory(new java.io.File("d:/Work/CasierieSanpetruExcel"));
+                fc.setCurrentDirectory(new java.io.File("./"));
                 fc.setDialogTitle("Alege CSV");
                 if(fc.showOpenDialog(open) == JFileChooser.APPROVE_OPTION){
                     File file = fc.getSelectedFile();

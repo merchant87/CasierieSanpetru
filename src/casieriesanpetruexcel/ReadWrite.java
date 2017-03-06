@@ -29,11 +29,12 @@ public class ReadWrite {
     
     Integer sold = 3067;
     Integer soldAnterior = 3067;
-    
-    private static final char DEFAULT_SEPARATOR = ',';
-    private static final char DEFAULT_QUOTE = '"';
+    String year;
     
     private final String rootDir = "./assets/";
+    
+    FileInputStream input_document;
+    XSSFWorkbook templateWorkbook;
     
     public ReadWrite(){
         
@@ -45,19 +46,18 @@ public class ReadWrite {
         ArrayList<String> values = new ArrayList<String>();
         ArrayList<String> descriptions = new ArrayList<String>();
                 
-        try{
+        try {
             Scanner scanner = new Scanner(new File(file));
+            Integer row = 0;
             while (scanner.hasNext()) {
-                List<String> line = parseLine(scanner.nextLine());
+                List<String> line = CSVHelper.parseLine(scanner.nextLine());
                 String valoare = line.get(5);
                 String descriere = line.get(2);
                 Date selectedDate, rowDate;
-                
-                
-                
+  
                 if(line.get(0).equals("Casierie Sampetru")) {
-                    
-                    try{
+                   
+                    try {
                         SimpleDateFormat sdf = new SimpleDateFormat("MM-d-yyyy");
                         selectedDate = sdf.parse(date);
 
@@ -71,8 +71,18 @@ public class ReadWrite {
                            if(!line.get(1).equals(currentDate)){
                                 
                                 if(!currentDate.equals("")){
+                                    
+                                    if( row == 0 ){
+                                        input_document = new FileInputStream(new File(this.rootDir + "proces_verbal_sanpetru_template.xlsx"));
+                                        templateWorkbook = new XSSFWorkbook(input_document); 
+                                        
+                                        String [] dateParts = currentDate.split("-");
+                                        year = dateParts[0];
+                                    }
+                                    row++;
                                     //System.out.println(" in LOOP Current date: [" + currentDate + "]");
-                                    this.writeXlsXPoi(currentDate ,values, descriptions);
+//                                   this.writeXlsXPoi(currentDate ,values, descriptions);
+                                    this.writeSheetXlsXPoi(currentDate ,values, descriptions); 
                                 } 
                                 currentDate = line.get(1);
 
@@ -98,7 +108,20 @@ public class ReadWrite {
             if(!values.isEmpty()){// last set of data
                 //System.out.println(" OUT OF LOOP Current date: [" + currentDate + "]");
                 //System.out.println("values: " + values.toString());
-                this.writeXlsXPoi(currentDate ,values, descriptions);
+                this.writeSheetXlsXPoi(currentDate ,values, descriptions);            
+                input_document.close();
+                
+                
+
+                //Open FileOutputStream to write updates
+                FileOutputStream output_file = new FileOutputStream(new File(this.rootDir + "output/proces_verbal_sanpetru_" + year + ".xlsx"));          
+                templateWorkbook.removeSheetAt(2);
+                templateWorkbook.removeSheetAt(1);
+                templateWorkbook.removeSheetAt(0);
+                //write changes
+                templateWorkbook.write(output_file);           
+                //close the stream
+                output_file.close(); 
             }
             
             scanner.close();
@@ -109,126 +132,28 @@ public class ReadWrite {
         }
     }
 
-    public static List<String> parseLine(String cvsLine) {
-        return parseLine(cvsLine, DEFAULT_SEPARATOR, DEFAULT_QUOTE);
-    }
-
-    public static List<String> parseLine(String cvsLine, char separators) {
-        return parseLine(cvsLine, separators, DEFAULT_QUOTE);
-    }
-
-    public static List<String> parseLine(String cvsLine, char separators, char customQuote) {
-
-        List<String> result = new ArrayList<>();
-
-        //if empty, return!
-        if (cvsLine == null && cvsLine.isEmpty()) {
-            return result;
-        }
-
-        if (customQuote == ' ') {
-            customQuote = DEFAULT_QUOTE;
-        }
-
-        if (separators == ' ') {
-            separators = DEFAULT_SEPARATOR;
-        }
-
-        StringBuffer curVal = new StringBuffer();
-        boolean inQuotes = false;
-        boolean startCollectChar = false;
-        boolean doubleQuotesInColumn = false;
-
-        char[] chars = cvsLine.toCharArray();
-
-        for (char ch : chars) {
-
-            if (inQuotes) {
-                startCollectChar = true;
-                if (ch == customQuote) {
-                    inQuotes = false;
-                    doubleQuotesInColumn = false;
-                } else {
-
-                    //Fixed : allow "" in custom quote enclosed
-                    if (ch == '\"') {
-                        if (!doubleQuotesInColumn) {
-                            curVal.append(ch);
-                            doubleQuotesInColumn = true;
-                        }
-                    } else {
-                        curVal.append(ch);
-                    }
-
-                }
-            } else {
-                if (ch == customQuote) {
-
-                    inQuotes = true;
-
-                    //Fixed : allow "" in empty quote enclosed
-                    if (chars[0] != '"' && customQuote == '\"') {
-                        curVal.append('"');
-                    }
-
-                    //double quotes in column will hit this!
-                    if (startCollectChar) {
-                        curVal.append('"');
-                    }
-
-                } else if (ch == separators) {
-
-                    result.add(curVal.toString());
-
-                    curVal = new StringBuffer();
-                    startCollectChar = false;
-
-                } else if (ch == '\r') {
-                    //ignore LF characters
-                    continue;
-                } else if (ch == '\n') {
-                    //the end, break!
-                    break;
-                } else {
-                    curVal.append(ch);
-                }
-            }
-
-        }
-
-        result.add(curVal.toString());
-
-        return result;
-    }
     
-    
-    
-    private void writeXlsXPoi(String date, ArrayList<String> values, ArrayList<String> descriptions){
-        
-        
+    private void writeSheetXlsXPoi(String date, ArrayList<String> values, ArrayList<String> descriptions){
         try {
-            
-            //Read Excel document first
-            FileInputStream input_document = new FileInputStream(new File(this.rootDir + "proces_verbal_sanpetru_template.xlsx"));
-            // convert it into a POI object
-            XSSFWorkbook my_xlsx_workbook = new XSSFWorkbook(input_document); 
             // Read excel sheet that needs to be updated
-            XSSFSheet my_worksheet = my_xlsx_workbook.getSheetAt(0);
-            
-            // declare a Cell object            
-            Cell cellSoldAnterior = my_worksheet.getRow(4).getCell(3);
-            Cell cellSold = my_worksheet.getRow(28).getCell(2);
-            Cell cellDate = my_worksheet.getRow(0).getCell(4);
+            XSSFSheet currentWorksheet = templateWorkbook.cloneSheet(0);
+            templateWorkbook.setSheetName(templateWorkbook.getSheetIndex(currentWorksheet), date);
+
+//            // declare a Cell object            
+            Cell cellSoldAnterior = currentWorksheet.getRow(4).getCell(3);
+            Cell cellSold = currentWorksheet.getRow(28).getCell(2);
+            Cell cellDate = currentWorksheet.getRow(0).getCell(4);
             
             //changing date pattern
             try {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 Date d = sdf.parse(date);
+             
                 sdf.applyPattern("dd.MM.yyyy");
                 String romanianDate = sdf.format(d);
                 
                 cellDate.setCellValue("Data: " + romanianDate);
-                System.out.println("Date: " + date);
+                //System.out.println("Date: " + date);
             } catch (ParseException e) {
                 e.printStackTrace();
             }
@@ -240,9 +165,9 @@ public class ReadWrite {
             for (int i = 0; i < 20; i++) {
 
                 if(i < dataSize){
-                    Cell cellIn = my_worksheet.getRow(i+7).getCell(2);
-                    Cell cellOut = my_worksheet.getRow(i+7).getCell(3);
-                    Cell cellDesc = my_worksheet.getRow(i+7).getCell(4);
+                    Cell cellIn = currentWorksheet.getRow(i+7).getCell(2);
+                    Cell cellOut = currentWorksheet.getRow(i+7).getCell(3);
+                    Cell cellDesc = currentWorksheet.getRow(i+7).getCell(4);
                 
                     Double valoare = Double.parseDouble(values.get(i));
                     if(valoare > 0){
@@ -256,34 +181,22 @@ public class ReadWrite {
                     //System.out.println("valoare: " + valoare);
                 }
             }
-            
-            this.soldAnterior = this.sold;
+           //System.out.println("SOLD: " + sold);
+            this.soldAnterior = sold;
             for(int i = 0; i < dataSize; i++){
                 Double valoare = Double.parseDouble(values.get(i));
                 this.soldAnterior -= intValue(valoare);
             }
             cellSoldAnterior.setCellValue(this.soldAnterior);
             
-            cellSold.setCellValue(this.sold);
+            cellSold.setCellValue(sold);
             
             values.clear();
-            descriptions.clear();            
-            //important to close InputStream
-            input_document.close();
-            //Open FileOutputStream to write updates
-            FileOutputStream output_file = new FileOutputStream(new File(this.rootDir + "output/proces_verbal_sanpetru_" + date + ".xlsx"));          
-            my_xlsx_workbook.removeSheetAt(2);
-            my_xlsx_workbook.removeSheetAt(1);
-            //write changes
-            my_xlsx_workbook.write(output_file);           
-            //close the stream
-            output_file.close(); 
-            
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+            descriptions.clear();
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
-  
+      
 }
