@@ -31,6 +31,8 @@ public class MainGUI {
     
     public JComboBox operatori;
     
+    public JTextField soldStart;
+    
     
     public MainGUI(){
         mainFrame = new JFrame("Import CSV");
@@ -41,6 +43,9 @@ public class MainGUI {
         //mainPanel = new JPanel(new GridBagLayout()); // arangeable components in panel
         mainPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         mainPanel.setBackground(Color.WHITE);
+        
+        soldStart = new JTextField();
+        soldStart.setPreferredSize(new Dimension(80,20));
         
         importBtn = new JButton("Alege Fisier");
         importBtn.addActionListener(new ActionListener(){
@@ -77,21 +82,22 @@ public class MainGUI {
             public void actionPerformed(ActionEvent e){
                 //System.out.println("File Chose is: " + fileChose);
                 ReadWrite rw = new ReadWrite();
-                
-                rw.read(fileChosen, datePicker.getJFormattedTextField().getText(), operatori.getSelectedItem().toString());
-             
-                
+                if (!soldStart.getText().equals("")) { 
+                    rw.sold = Integer.valueOf(soldStart.getText());
+                }
+            
+                rw.read(fileChosen, datePicker.getJFormattedTextField().getText(), operatori.getSelectedItem().toString());               
             }
             
         });
         
-        
+        JLabel lblSoldStart = new JLabel("Sold Inceput");
+        mainPanel.add(lblSoldStart);
+        mainPanel.add(soldStart);
         
         mainPanel.add(importBtn);//, c);
 
         mainPanel.add(srcLabel);
-        
-        mainPanel.add(parseBtn);
         
         JLabel lblFileLink = new JLabel("Deschide fisier");
 
@@ -116,5 +122,7 @@ public class MainGUI {
         mainFrame.setVisible(true);
         
         mainFrame.add(mainPanel);
+        
+        mainPanel.add(parseBtn);
     }
 }

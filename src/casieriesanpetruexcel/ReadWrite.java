@@ -27,8 +27,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  */
 public class ReadWrite {
     
-    Integer sold = 3067;
-    Integer soldAnterior = 3067;
+    Integer sold = 0;
+    Integer soldAnterior = 0;
     String year;
     
     private final String rootDir = "./assets/";
