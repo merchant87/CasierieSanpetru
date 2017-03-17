@@ -19,7 +19,7 @@ import net.sourceforge.jdatepicker.impl.UtilDateModel;
  *
  * @author liviu
  */
-public class MainGUI {
+public class MainGUI extends JPanel{
     public JPanel  mainPanel;
     public JFrame  mainFrame;
     public JButton importBtn, parseBtn;
@@ -33,20 +33,33 @@ public class MainGUI {
     
     public JTextField soldStart;
     
+    GridBagConstraints gbc = new GridBagConstraints();
     
-    public MainGUI(){
-        mainFrame = new JFrame("Import CSV");
-       
-        mainFrame.setSize(600, 400);
-        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        
-        //mainPanel = new JPanel(new GridBagLayout()); // arangeable components in panel
-        mainPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        mainPanel.setBackground(Color.WHITE);
-        
+    public MainGUI() {
+//        mainFrame = new JFrame("Import CSV");
+//       
+//        mainFrame.setSize(600, 400);
+//        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+//        
+//        mainPanel = new JPanel(new GridBagLayout()); // arangeable components in panel
+////        mainPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+//        mainPanel.setBackground(Color.WHITE);
+        setLayout(new GridBagLayout());
+        // ROW 1
+        JLabel lblSoldStart = new JLabel("Sold Inceput");
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        add(lblSoldStart, gbc);
+
         soldStart = new JTextField();
         soldStart.setPreferredSize(new Dimension(80,20));
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        add(soldStart, gbc);
         
+        
+        // ROW 2
         importBtn = new JButton("Alege Fisier");
         importBtn.addActionListener(new ActionListener(){
             
@@ -71,12 +84,41 @@ public class MainGUI {
             }
             
         });
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        add(importBtn, gbc);
         
         srcLabel = new JLabel("Nici un fisier ales ...");
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        add(srcLabel, gbc);
+ 
+        JLabel lblFileLink = new JLabel("Deschide fisier");
+
+        // To indicate the the link is clickable
+        lblFileLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        gbc.gridx = 2;
+        gbc.gridy = 2;
+        add(lblFileLink, gbc);
+
+        // ROW 3
+        String[] strOperatori = {"<", "=", ">"};
         
+        operatori = new JComboBox(strOperatori);
+        operatori.setSelectedIndex(2);
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        add(operatori, gbc);
+        
+        UtilDateModel model=new UtilDateModel();
+        JDatePanelImpl datePanel = new JDatePanelImpl(model);
+        datePicker = new JDatePickerImpl(datePanel, new DateLabelFormatter());
+        gbc.gridx = 1;
+        gbc.gridy = 4;
+        add(datePicker, gbc);
+   
         parseBtn = new JButton("Parse CSV");
         parseBtn.setEnabled(false);
-        parseBtn.setBounds(10, 10, 80, 20);
         parseBtn.addActionListener(new ActionListener(){
             
             public void actionPerformed(ActionEvent e){
@@ -90,39 +132,9 @@ public class MainGUI {
             }
             
         });
+        gbc.gridx = 0;
+        gbc.gridy = 6;
+        add(parseBtn, gbc); 
         
-        JLabel lblSoldStart = new JLabel("Sold Inceput");
-        mainPanel.add(lblSoldStart);
-        mainPanel.add(soldStart);
-        
-        mainPanel.add(importBtn);//, c);
-
-        mainPanel.add(srcLabel);
-        
-        JLabel lblFileLink = new JLabel("Deschide fisier");
-
-        // To indicate the the link is clickable
-        lblFileLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        
-        mainPanel.add(lblFileLink);
-
-        String[] strOperatori = {"<", "=", ">"};
-        
-        operatori = new JComboBox(strOperatori);
-        operatori.setSelectedIndex(2);
-        operatori.setBounds(250,350,50,30);
-        mainPanel.add(operatori);
-        
-        UtilDateModel model=new UtilDateModel();
-        JDatePanelImpl datePanel = new JDatePanelImpl(model);
-        datePicker = new JDatePickerImpl(datePanel, new DateLabelFormatter());
-        datePicker.setBounds(280,350,120,30);
-        mainPanel.add(datePicker);
-   
-        mainFrame.setVisible(true);
-        
-        mainFrame.add(mainPanel);
-        
-        mainPanel.add(parseBtn);
     }
 }

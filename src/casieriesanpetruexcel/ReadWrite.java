@@ -58,16 +58,16 @@ public class ReadWrite {
                 if(line.get(0).equals("Casierie Sampetru")) {
                    
                     try {
-                        SimpleDateFormat sdf = new SimpleDateFormat("MM-d-yyyy");
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                         selectedDate = sdf.parse(date);
 
                         rowDate = sdf.parse(line.get(1));
                         
-                        
-                        if(operator.equals("=") && rowDate.equals(selectedDate) ||
-                           operator.equals("<") && (rowDate.before(selectedDate) || rowDate.equals(selectedDate)) ||
-                           operator.equals(">") && (rowDate.after(selectedDate) || rowDate.equals(selectedDate))
+                        if((operator.equals("=") && rowDate.equals(selectedDate)) ||
+                           (operator.equals("<") && (rowDate.before(selectedDate) || rowDate.equals(selectedDate))) ||
+                           (operator.equals(">") && (rowDate.after(selectedDate) || rowDate.equals(selectedDate)))
                            ){
+
                            if(!line.get(1).equals(currentDate)){
                                 
                                 if(!currentDate.equals("")){
@@ -80,8 +80,6 @@ public class ReadWrite {
                                         year = dateParts[0];
                                     }
                                     row++;
-                                    //System.out.println(" in LOOP Current date: [" + currentDate + "]");
-//                                   this.writeXlsXPoi(currentDate ,values, descriptions);
                                     this.writeSheetXlsXPoi(currentDate ,values, descriptions); 
                                 } 
                                 currentDate = line.get(1);
@@ -110,8 +108,6 @@ public class ReadWrite {
                 //System.out.println("values: " + values.toString());
                 this.writeSheetXlsXPoi(currentDate ,values, descriptions);            
                 input_document.close();
-                
-                
 
                 //Open FileOutputStream to write updates
                 FileOutputStream output_file = new FileOutputStream(new File(this.rootDir + "output/proces_verbal_sanpetru_" + year + ".xlsx"));          
@@ -158,10 +154,8 @@ public class ReadWrite {
                 e.printStackTrace();
             }
             
-                    
             Integer dataSize = values.size();
             //System.out.println("Data size is: [" + dataSize.toString() + "]");
-            
             for (int i = 0; i < 20; i++) {
 
                 if(i < dataSize){
@@ -172,10 +166,8 @@ public class ReadWrite {
                     Double valoare = Double.parseDouble(values.get(i));
                     if(valoare > 0){
                         cellIn.setCellValue(valoare);
-                        //this.soldAnterior -= intValue(Math.abs(valoare));
                     } else {
                         cellOut.setCellValue(Math.abs(valoare));
-                        //this.soldAnterior += intValue(Math.abs(valoare));
                     }
                     cellDesc.setCellValue(descriptions.get(i));
                     //System.out.println("valoare: " + valoare);

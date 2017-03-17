@@ -6,6 +6,7 @@
 package casieriesanpetruexcel;
 
 import java.awt.*;
+import javax.swing.JFrame;
 
 
 /**
@@ -24,7 +25,12 @@ public class CasierieSanpetruExcel {
     }
     
     public CasierieSanpetruExcel(){
-        mainGUI = new MainGUI();
+        MainGUI mainGUI = new MainGUI();
+        JFrame mainFrame = new JFrame("Import CSV");
+        mainFrame.setSize(600, 400);
+        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        mainFrame.setVisible(true);
+        mainFrame.add(mainGUI);
     }
 
 }
