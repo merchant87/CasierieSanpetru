@@ -62,23 +62,24 @@ public class ReadWrite {
                         selectedDate = sdf.parse(date);
 
                         rowDate = sdf.parse(line.get(1));
-                        
+
                         if((operator.equals("=") && rowDate.equals(selectedDate)) ||
                            (operator.equals("<") && (rowDate.before(selectedDate) || rowDate.equals(selectedDate))) ||
                            (operator.equals(">") && (rowDate.after(selectedDate) || rowDate.equals(selectedDate)))
                            ){
-
+                                                   
                            if(!line.get(1).equals(currentDate)){
+                                if( row == 0 ){
+                                    input_document = new FileInputStream(new File(this.rootDir + "proces_verbal_sanpetru_template.xlsx"));
+                                    templateWorkbook = new XSSFWorkbook(input_document); 
+
+                                    String [] dateParts = currentDate.split("-");
+                                    year = dateParts[0];
+                                }
                                 
                                 if(!currentDate.equals("")){
+                                    System.out.println("current Date is EMPTY here !!");
                                     
-                                    if( row == 0 ){
-                                        input_document = new FileInputStream(new File(this.rootDir + "proces_verbal_sanpetru_template.xlsx"));
-                                        templateWorkbook = new XSSFWorkbook(input_document); 
-                                        
-                                        String [] dateParts = currentDate.split("-");
-                                        year = dateParts[0];
-                                    }
                                     row++;
                                     this.writeSheetXlsXPoi(currentDate ,values, descriptions); 
                                 } 
@@ -130,9 +131,11 @@ public class ReadWrite {
 
     
     private void writeSheetXlsXPoi(String date, ArrayList<String> values, ArrayList<String> descriptions){
+        System.out.println("write sheeet");
         try {
             // Read excel sheet that needs to be updated
             XSSFSheet currentWorksheet = templateWorkbook.cloneSheet(0);
+//            templateWorkbook.getSheet("Sheet 1");
             templateWorkbook.setSheetName(templateWorkbook.getSheetIndex(currentWorksheet), date);
 
 //            // declare a Cell object            
