@@ -17,20 +17,20 @@ public class CSVHelper {
     private static final char DEFAULT_SEPARATOR = ',';
     private static final char DEFAULT_QUOTE = '"';
     
-    public static List<String> parseLine(String cvsLine) {
-        return parseLine(cvsLine, DEFAULT_SEPARATOR, DEFAULT_QUOTE);
+    public static List<String> parseLine(String csvLine) {
+        return parseLine(csvLine, DEFAULT_SEPARATOR, DEFAULT_QUOTE);
     }
 
-    public static List<String> parseLine(String cvsLine, char separators) {
-        return parseLine(cvsLine, separators, DEFAULT_QUOTE);
+    public static List<String> parseLine(String csvLine, char separators) {
+        return parseLine(csvLine, separators, DEFAULT_QUOTE);
     }
 
-    public static List<String> parseLine(String cvsLine, char separators, char customQuote) {
+    public static List<String> parseLine(String csvLine, char separators, char customQuote) {
 
         List<String> result = new ArrayList<>();
 
         //if empty, return!
-        if (cvsLine == null && cvsLine.isEmpty()) {
+        if (csvLine == null && csvLine.isEmpty()) {
             return result;
         }
 
@@ -47,7 +47,7 @@ public class CSVHelper {
         boolean startCollectChar = false;
         boolean doubleQuotesInColumn = false;
 
-        char[] chars = cvsLine.toCharArray();
+        char[] chars = csvLine.toCharArray();
 
         for (char ch : chars) {
 
